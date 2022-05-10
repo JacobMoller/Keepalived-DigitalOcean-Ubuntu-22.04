@@ -1,6 +1,10 @@
 # Keepalived-DigitalOcean-Ubuntu-22.04
 Keepalived with DigitalOcean using Ubuntu 22.04. Based on ["How To Set Up Highly Available Web Servers with Keepalived and Floating IPs on Ubuntu 14.04"](https://www.digitalocean.com/community/tutorials/how-to-set-up-highly-available-web-servers-with-keepalived-and-floating-ips-on-ubuntu-14-04)
  By [Justin Ellingwood](https://www.digitalocean.com/community/users/jellingwood)
+ 
+ 
+## Introduction
+We will make a setup with two DigitalOcean Droplets and a Floating IP which enables one droplet to take over if the other one fails.
 
 ## Prerequisites
 
@@ -15,6 +19,23 @@ Keepalived with DigitalOcean using Ubuntu 22.04. Based on ["How To Set Up Highly
 * One Floating IP
 
 ## Install and Configure Nginx
+
+Open the terminal for both the primary and secondary droplet. Update and install nginx.
+
+```
+sudo apt-get update
+sudo apt-get install nginx
+```
+
+Now nginx should be installed, which generates a default webpage when accessing your droplet IP.
+To clearly indicate if we use the primary or secondary droplet, edit the default page using
+```
+sudo nano /var/www/html/index.nginx-debian.html
+```
+
+On the primary server add something like `<h1>Primary</h1>`.
+
+On the secondary server add something like `<h1>Secondary</h1>`.
 
 ## Build and Install Keepalived
 
