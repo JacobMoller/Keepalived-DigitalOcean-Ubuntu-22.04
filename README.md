@@ -39,6 +39,20 @@ On the secondary server add something like `<h1>Secondary</h1>`.
 
 ## Build and Install Keepalived
 
+```
+sudo apt-get install build-essential libssl-dev
+```
+
+We install the newest keepalived version at the time of writing but you can find the latest version at [the Keepalived download page](https://www.keepalived.org/download.html#)
+```
+cd ~
+wget http://www.keepalived.org/software/keepalived-2.2.7.tar.gz
+```
+
+```
+tar xzvf keepalived*
+cd keepalived-2.2.7
+```
 ## Create a Keepalived Upstart Script
 
 ## Create the Keepalived Configuration File
