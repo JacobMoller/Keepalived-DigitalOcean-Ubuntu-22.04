@@ -152,15 +152,18 @@ sudo curl -LO http://do.co/assign-ip
 ```
 
 ### Create a DigitalOcean API Token
-TODO: DESCRIBE WHY WE HAVE TO MAKE DO_TOKEN
+To enable the change of the Floating IP we need a DigitalOcean API Token. Create this on the DigitalOcean Website on the page "API".
+
+Copy the API token and save it in an environment variable on both servers:
 ```
 export DO_TOKEN=[INSERT api_token HERE]
 ```
-
-
+### (Optional) Test if the Floating IP transition works
+To test that the Floating IP can be moved enter the following command in the server that you want to assign. Note that the droplet_ID can be found on the DigitalOcean website by clicking on the server. It is now a part of the url (in the format https://cloud.digitalocean.com/droplets/{droplet_id}).
 ```
-python3 /usr/local/bin/assign-ip [floating_ip] [droplet_ID]
+python3 /usr/local/bin/assign-ip [INSERT floating_ip HERE] [INSERT droplet_ID HERE]
 ```
+The Floating IP should now be assigned to the droplet you choose.
 
 ### Create the Wrapper Script
 We need a wrapper script that automatically checkes if the current server has the floating IP. On both servers make a new script:
