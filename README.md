@@ -38,18 +38,19 @@ On the primary server add something like `<h1>Primary</h1>`.
 On the secondary server add something like `<h1>Secondary</h1>`.
 
 ## Install Keepalived
-
+We now need to install Keepalived, the service that enables fallover. Install Keepalived by entering the command in both terminals:
 ```
 sudo apt-get install keepalived
 ```
 
 ## Create a Keepalived Upstart Script
+On both servers we need to make a Keepalive upstart script. Open the Keepalived configuration script in both terminals:
 ```
 sudo nano /etc/init/keepalived.conf
 ```
-
+Now enter the following default configuration. This script automaticly restarts if it stops (as we need it at all times check if the primary server is live).
 ```
-description "load-balancing and high-availability service"
+description "high-availability service"
 
 start on runlevel [2345]
 stop on runlevel [!2345]
@@ -58,20 +59,22 @@ respawn
 
 exec /usr/local/sbin/keepalived --dont-fork
 ```
+Save and close the file.
 ## Create the Keepalived Configuration File
+For the individual servers we need to setup a configuration file that informs them on their own IP and the other server(s) IP(s). Start by making a directory for this on both servers:
 ```
 sudo mkdir -p /etc/keepalived
 ```
 ### Creating the Primary Server’s Configuration
-Note the primary servers IP:
+Use the following commang in the Primary servers console and note the Primary servers IP:
 ```
 curl http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address && echo
 ```
-
+Make a new file for configuration on the Primary server:
 ```
 sudo nano /etc/keepalived/keepalived.conf
 ```
-TODO: Here we use pgrep
+Enter the following code that checks if `nginx` is running every 2 seconds. This file also defines that the Primary server is `Master` and has a higher priority than the other server, `200`. Insert the Primary server IP, Secondary server IP and a password that needs to be the same on all servers: 
 ```
 vrrp_script chk_nginx {
     script "pgrep nginx"
@@ -101,8 +104,17 @@ vrrp_instance VI_1 {
     notify_master /etc/keepalived/master.sh
 }
 ```
-
+Save and close the file.
 ### Creating the Secondary Server’s Configuration
+Use the following commang in the Secodary servers console and note the Secondary servers IP:
+```
+curl http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address && echo
+```
+Make a new file for configuration on the Secondary server:
+```
+sudo nano /etc/keepalived/keepalived.conf
+```
+Enter the following script for the Secondary server. Note that the state is now `BACKUP` and that the priority of this server is lower. Like before, insert the Secondary server IP, Primary server IP and a password that needs to be the same on all servers:
 ```
 vrrp_script chk_nginx {
     script "pgrep nginx"
@@ -132,7 +144,7 @@ vrrp_instance VI_1 {
     notify_master /etc/keepalived/master.sh
 }
 ```
-
+Save and close the file.
 ## Create the Floating IP Transition Scripts
 ```
 cd /usr/local/bin
@@ -151,10 +163,11 @@ python3 /usr/local/bin/assign-ip [floating_ip] [droplet_ID]
 ```
 
 ### Create the Wrapper Script
+We need a wrapper script that automatically checkes if the current server has the floating IP. On both servers make a new script:
 ```console
 sudo nano /etc/keepalived/master.sh
 ```
-
+Insert the following script:
 ```
 #!/bin/sh
 export DO_TOKEN='digitalocean_api_token'
@@ -172,7 +185,9 @@ if [ $HAS_FLOATING_IP = "false" ]; then
     done
 fi
 ```
+Save and close the file on both servers.
 
+We need to make the script executable on both servers with the following command:
 ```
 sudo chmod +x /etc/keepalived/master.sh
 ```
@@ -182,17 +197,26 @@ To start the service, enter the following command in both the Primary and Second
 ```
 sudo service keepalived start
 ```
+The primary server should now be displayed when accessing the Floating IP.
 
 ## Testing the functionality
-
+To test that the functionality works, try to stop nginx on the primary server:
 ```
 sudo service nginx stop
 ```
+The Secondary server should now be displayed at the Floating IP after a few seconds.
 
+To start the Primary server again run this command in the Primary console:
 ```
 sudo service nginx start
 ```
-
+To simulate a server failture you can make the Primary server restart using the following command in the Primary servers console:
 ```
 sudo reboot
 ```
+The Secondary server should now be displayed at the Floating IP after a few seconds. When the Primary server has rebotted it will take over and display at the Floating IP.
+
+**Congratulations, you now have a high-availability setup using Keepalived!**
+
+## Where to go from here
+Keepalived offers other functionality such as load-balancing for your web-service. Read more about this at their [Documentation Page](https://keepalived.readthedocs.io/en/latest/index.html).
