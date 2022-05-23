@@ -170,11 +170,11 @@ We need a wrapper script that automatically checkes if the current server has th
 ```console
 sudo nano /etc/keepalived/master.sh
 ```
-Insert the following script:
+Insert the following script, but replace the DO_TOKEN and IP with your API Token and Floating IP:
 ```
 #!/bin/sh
-export DO_TOKEN='digitalocean_api_token'
-IP='floating_ip_addr'
+export DO_TOKEN='[INSERT digitalocean_api_token HERE]'
+IP='[INSERT floating_ip_addr HERE]'
 ID=$(curl -s http://169.254.169.254/metadata/v1/id)
 HAS_FLOATING_IP=$(curl -s http://169.254.169.254/metadata/v1/floating_ip/ipv4/active)
 
