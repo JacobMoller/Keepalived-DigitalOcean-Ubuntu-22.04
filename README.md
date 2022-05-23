@@ -37,29 +37,12 @@ On the primary server add something like `<h1>Primary</h1>`.
 
 On the secondary server add something like `<h1>Secondary</h1>`.
 
-## Build and Install Keepalived
+## Install Keepalived
 
 ```
-sudo apt-get install build-essential libssl-dev
+sudo apt-get install keepalived
 ```
 
-We install the newest keepalived version at the time of writing but you can find the latest version at [the Keepalived download page](https://www.keepalived.org/download.html#)
-```
-cd ~
-wget http://www.keepalived.org/software/keepalived-2.2.7.tar.gz
-```
-
-```
-tar xzvf keepalived*
-cd keepalived-2.2.7
-```
-
-```
-./configure
-make
-sudo make install
-```
-The deamon is now installed
 ## Create a Keepalived Upstart Script
 ```
 sudo nano /etc/init/keepalived.conf
@@ -80,6 +63,14 @@ exec /usr/local/sbin/keepalived --dont-fork
 sudo mkdir -p /etc/keepalived
 ```
 ### Creating the Primary Server’s Configuration
+Note the primary servers IP:
+```
+curl http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address && echo
+```
+
+```
+sudo nano /etc/keepalived/keepalived.conf
+```
 TODO: Here we use pgrep
 ```
 vrrp_script chk_nginx {
@@ -114,7 +105,7 @@ vrrp_instance VI_1 {
 ### Creating the Secondary Server’s Configuration
 ```
 vrrp_script chk_nginx {
-    script "pidof nginx"
+    script "pgrep nginx"
     interval 2
 }
 
@@ -175,7 +166,7 @@ if [ $HAS_FLOATING_IP = "false" ]; then
     n=0
     while [ $n -lt 10 ]
     do
-        python /usr/local/bin/assign-ip $IP $ID && break
+        python3 /usr/local/bin/assign-ip $IP $ID && break
         n=$((n+1))
         sleep 3
     done
@@ -187,6 +178,21 @@ sudo chmod +x /etc/keepalived/master.sh
 ```
 
 ## Start Up the Keepalived Service and Test Failover
+To start the service, enter the following command in both the Primary and Secondary console:
+```
+sudo service keepalived start
 ```
 
+## Testing the functionality
+
+```
+sudo service nginx stop
+```
+
+```
+sudo service nginx start
+```
+
+```
+sudo reboot
 ```
