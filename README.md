@@ -66,7 +66,7 @@ For the individual servers we need to setup a configuration file that informs th
 sudo mkdir -p /etc/keepalived
 ```
 ### Creating the Primary Server’s Configuration
-Use the following commang in the Primary servers console and note the Primary servers IP. Also, go to the Secondary server and note the note the Secondary servers IP:
+Use the following commang in the Primary servers console and note the Primary servers IP. Also, go to the Secondary server and note the Secondary servers IP:
 ```
 curl http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address && echo
 ```
